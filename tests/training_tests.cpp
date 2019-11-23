@@ -9,15 +9,15 @@ using namespace eosio::chain;
 using namespace eosio::testing;
 using namespace fc;
 
-BOOST_AUTO_TEST_SUITE(talk_tests)
+BOOST_AUTO_TEST_SUITE(training_tests)
 
 BOOST_AUTO_TEST_CASE(post) try {
     tester t{setup_policy::none};
 
     // Load contract
-    t.create_account(N(talk));
-    t.set_code(N(talk), read_wasm("talk.wasm"));
-    t.set_abi(N(talk), read_abi("talk.abi").data());
+    t.create_account(N(training));
+    t.set_code(N(training), read_wasm("training.wasm"));
+    t.set_abi(N(training), read_abi("training.abi").data());
     t.produce_block();
 
     // Create users
@@ -26,40 +26,52 @@ BOOST_AUTO_TEST_CASE(post) try {
 
     // Test "post" action
     t.push_action(
-        N(talk), N(post), N(john),
+        N(training), N(post), N(john),
         mutable_variant_object //
         ("id", 1)              //
         ("reply_to", 0)        //
         ("user", "john")       //
-        ("content", "post 1")  //
+        ("heart_rate", 255)    //
+        ("distance", 1)        //
+        ("speed", 9)           //
+        ("time", 150)          //
     );
     t.push_action(
-        N(talk), N(post), N(jane),
+        N(training), N(post), N(jane),
         mutable_variant_object //
         ("id", 2)              //
         ("reply_to", 0)        //
         ("user", "jane")       //
-        ("content", "post 2")  //
+        ("heart_rate", 190)      //
+        ("distance", 20)        //
+        ("speed", 7)           //
+        ("time", 100)            //
     );
     t.push_action(
-        N(talk), N(post), N(john),
+        N(training), N(post), N(john),
         mutable_variant_object       //
         ("id", 3)                    //
         ("reply_to", 2)              //
         ("user", "john")             //
-        ("content", "post 3: reply") //
+        ("heart_rate", 180)            //
+        ("distance", 20)              //
+        ("speed", 6)                 //
+        ("time", 150)                  //
     );
 
     // Can't reply to non-existing message
     BOOST_CHECK_THROW(
         [&] {
             t.push_action(
-                N(talk), N(post), N(john),
+                N(training), N(post), N(john),
                 mutable_variant_object       //
                 ("id", 4)                    //
                 ("reply_to", 99)             //
                 ("user", "john")             //
-                ("content", "post 3: reply") //
+                ("heart_rate", 200)            //
+                ("distance", 15)              //
+                ("speed", 5)                 //
+                ("time", 180)                  //
             );
         }(),
         fc::exception);

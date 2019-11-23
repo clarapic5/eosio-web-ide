@@ -12,7 +12,10 @@ interface PostData {
     id?: number;
     user?: string;
     reply_to?: number;
-    content?: string;
+    heart_rate?: number;
+    distance?: number;
+    speed?: number;
+    time?: number;
 };
 
 interface PostFormState {
@@ -33,7 +36,11 @@ class PostForm extends React.Component<{}, PostFormState> {
                 id: 0,
                 user: 'bob',
                 reply_to: 0,
-                content: 'This is a test'
+                heart_rate: 255,
+                distance: 5,
+                speed: 6,
+                time:20
+
             },
             error: '',
         };
@@ -49,7 +56,7 @@ class PostForm extends React.Component<{}, PostFormState> {
             const result = await this.api.transact(
                 {
                     actions: [{
-                        account: 'talk',
+                        account: 'training',
                         name: 'post',
                         authorization: [{
                             actor: this.state.data.user,
@@ -100,11 +107,35 @@ class PostForm extends React.Component<{}, PostFormState> {
                         /></td>
                     </tr>
                     <tr>
-                        <td>Content</td>
+                        <td>Heart Rate</td>
                         <td><input
                             style={{ width: 500 }}
-                            value={this.state.data.content}
-                            onChange={e => this.setData({ content: e.target.value })}
+                            value={this.state.data.heart_rate}
+                            onChange={e => this.setData({ heart_rate: +e.target.value })}
+                        /></td>
+                    </tr>
+                     <tr>
+                        <td>Distance</td>
+                        <td><input
+                            style={{ width: 500 }}
+                            value={this.state.data.distance}
+                            onChange={e => this.setData({ distance: +e.target.value })}
+                        /></td>
+                    </tr>
+                      <tr>
+                        <td>Speed</td>
+                        <td><input
+                            style={{ width: 500 }}
+                            value={this.state.data.speed}
+                            onChange={e => this.setData({ speed: +e.target.value })}
+                        /></td>
+                    </tr>
+                     <tr>
+                        <td>Time</td>
+                        <td><input
+                            style={{ width: 500 }}
+                            value={this.state.data.time}
+                            onChange={e => this.setData({ time: +e.target.value })}
                         /></td>
                     </tr>
                 </tbody>
@@ -120,55 +151,16 @@ class PostForm extends React.Component<{}, PostFormState> {
     }
 }
 
-class Messages extends React.Component<{}, { content: string }> {
+class Activities extends React.Component<{}, { heart_rate: number, distance: number, speed: number, time: number }> {
     interval: number;
 
     constructor(props: {}) {
         super(props);
-        this.state = { content: '///' };
-    }
-
-    componentDidMount() {
-        this.interval = window.setInterval(async () => {
-            try {
-                const rows = await rpc.get_table_rows({
-                    json: true, code: 'talk', scope: '', table: 'message', limit: 1000,
-                });
-                let content =
-                    'id          reply_to      user          content\n' +
-                    '=============================================================\n';
-                for (let row of rows.rows)
-                    content +=
-                        (row.id + '').padEnd(12) +
-                        (row.reply_to + '').padEnd(12) + '  ' +
-                        row.user.padEnd(14) +
-                        row.content + '\n';
-                this.setState({ content });
-            } catch (e) {
-                if (e.json)
-                    this.setState({ content: JSON.stringify(e.json, null, 4) });
-                else
-                    this.setState({ content: '' + e });
-            }
-
-        }, 200);
-    }
-
-    componentWillUnmount() {
-        clearInterval(this.interval);
-    }
-
-    render() {
-        return <code><pre>{this.state.content}</pre></code>;
+        this.state = { 
+            heart_rate: 0,
+            distance: 0,
+            speed: 0,
+            time: 0
+        };
     }
 }
-
-ReactDOM.render(
-    <div>
-        <PostForm />
-        <br />
-        Messages:
-        <Messages />
-    </div>,
-    document.getElementById("example")
-);
