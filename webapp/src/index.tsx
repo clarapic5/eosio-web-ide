@@ -216,7 +216,7 @@ ReactDOM.render(
     <div>
         <PostForm />
         <br />
-        Messages:
+        Training data:
         <Activities />
     </div>,
     document.getElementById("example")
