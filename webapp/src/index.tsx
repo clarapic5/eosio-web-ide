@@ -189,7 +189,7 @@ class Activities extends React.Component<{}, { content: string }> {
                         (row.distance + '').padEnd(12) + '  ' +
                         (row.speed + '').padEnd(12) + '  ' +
                         (row.time + '').padEnd(12) + '  ' +
-                          '\n';
+                         '\n';
                 this.setState({ content });
             } 
             
@@ -216,7 +216,7 @@ ReactDOM.render(
     <div>
         <PostForm />
         <br />
-        Training Data:
+        Messages:
         <Activities />
     </div>,
     document.getElementById("example")

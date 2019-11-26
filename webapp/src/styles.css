@@ -3,7 +3,11 @@ table {
 }
 
 table, th, td {
+<<<<<<< HEAD
     border: solid 1px;
+=======
+    border: solid 1 px;
+>>>>>>> f7a53f06213d8d00c58d73987ce7d12e3ed55bdd
 }
 
 th, td {
