@@ -1,4 +1,4 @@
-// To see this in action, run this in a terminal:
+// To see this in action, run this in a terminal:  
 //      gp preview $(gp url 8000)
 
 import * as React from "react";
@@ -12,6 +12,7 @@ interface PostData {
     id?: number;
     user?: string;
     reply_to?: number;
+    content?: string;
     heart_rate?: number;
     distance?: number;
     speed?: number;
@@ -36,11 +37,7 @@ class PostForm extends React.Component<{}, PostFormState> {
                 id: 0,
                 user: 'bob',
                 reply_to: 0,
-                heart_rate: 255,
-                distance: 5,
-                speed: 6,
-                time:20
-
+                content: 'This is a test'
             },
             error: '',
         };
@@ -107,14 +104,22 @@ class PostForm extends React.Component<{}, PostFormState> {
                         /></td>
                     </tr>
                     <tr>
-                        <td>Heart Rate</td>
+                        <td>Content</td>
+                        <td><input
+                            style={{ width: 500 }}
+                            value={this.state.data.content}
+                            onChange={e => this.setData({ content: e.target.value })}
+                        /></td>
+                    </tr>
+                    <tr>
+                        <td>Heart rate</td>
                         <td><input
                             style={{ width: 500 }}
                             value={this.state.data.heart_rate}
                             onChange={e => this.setData({ heart_rate: +e.target.value })}
                         /></td>
                     </tr>
-                     <tr>
+                    <tr>
                         <td>Distance</td>
                         <td><input
                             style={{ width: 500 }}
@@ -122,7 +127,7 @@ class PostForm extends React.Component<{}, PostFormState> {
                             onChange={e => this.setData({ distance: +e.target.value })}
                         /></td>
                     </tr>
-                      <tr>
+                     <tr>
                         <td>Speed</td>
                         <td><input
                             style={{ width: 500 }}
@@ -130,7 +135,7 @@ class PostForm extends React.Component<{}, PostFormState> {
                             onChange={e => this.setData({ speed: +e.target.value })}
                         /></td>
                     </tr>
-                     <tr>
+                    <tr>
                         <td>Time</td>
                         <td><input
                             style={{ width: 500 }}
@@ -151,16 +156,68 @@ class PostForm extends React.Component<{}, PostFormState> {
     }
 }
 
-class Activities extends React.Component<{}, { heart_rate: number, distance: number, speed: number, time: number }> {
+class Activities extends React.Component<{}, { content: string }> {
     interval: number;
 
     constructor(props: {}) {
         super(props);
-        this.state = { 
-            heart_rate: 0,
-            distance: 0,
-            speed: 0,
-            time: 0
-        };
+        this.state = { content: '///' };
+    }
+
+    componentDidMount() {
+        this.interval = window.setInterval(async () => {
+            try {                
+                const rows = await rpc.get_table_rows({
+                    json: true, 
+                    code: 'training', 
+                    scope: '', 
+                    table: 'activity', 
+                    limit: 1000,
+                });
+
+                let content =
+                    'id          reply_to      user          heart rate     distance     speed     time \n' +
+                    '=====================================================================================\n';
+
+            
+                for (let row of rows.rows)
+                    content +=
+                        (row.id + '').padEnd(12) +
+                        (row.reply_to + '').padEnd(12) + '  ' +
+                        row.user.padEnd(14) +
+                        (row.heart_rate + '').padEnd(12) + '  ' +
+                        (row.distance + '').padEnd(12) + '  ' +
+                        (row.speed + '').padEnd(12) + '  ' +
+                        (row.time + '').padEnd(12) + '  ' +
+                          '\n';
+                this.setState({ content });
+            } 
+            
+            catch (e) {
+                if (e.json)
+                    this.setState({ content: JSON.stringify(e.json, null, 4) });
+                else
+                    this.setState({ content: '' + e });
+            }
+
+        }, 200);
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.interval);
+    }
+
+    render() {
+        return <code><pre>{this.state.content}</pre></code>;
     }
 }
+
+ReactDOM.render(
+    <div>
+        <PostForm />
+        <br />
+        Training Data:
+        <Activities />
+    </div>,
+    document.getElementById("example")
+);
